@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>A few questions</title>
+<style>
+  :root {
+    --ink: #26251F; --paper: #F2F1EC; --rasp: #A64665; --muted: #8A8578; --line: #DDD9CF; --white: #FFFFFF;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+  body { font-family: var(--sans); -webkit-text-size-adjust: 100%; }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 32px 24px 150px; }
+  .wrap.welcome { padding-top: 64px; }
+  h1 { font-family: var(--serif); font-weight: normal; margin: 0; }
+  h1.big { font-size: 2.3rem; line-height: 1.15; }
+  h1.mid { font-size: 1.9rem; line-height: 1.2; }
+  h1.q { font-size: 1.45rem; line-height: 1.35; margin-top: 16px; }
+  p { margin: 0; }
+  .body-copy p { font-size: 1rem; line-height: 1.6; margin-top: 16px; }
+  .muted { color: var(--muted); } .rasp { color: var(--rasp); } .strong { font-weight: 600; }
+  .small { font-size: 0.875rem; line-height: 1.55; }
+  .mt8 { margin-top: 8px; } .mt12 { margin-top: 12px; } .mt20 { margin-top: 20px; }
+  .mt32 { margin-top: 32px; } .mt40 { margin-top: 40px; }
+  .bar { height: 4px; border-radius: 4px; background: var(--line); }
+  .bar > div { height: 4px; border-radius: 4px; background: var(--rasp); transition: width .25s ease; }
+  button { font-family: var(--sans); font-size: 1rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .btn { border-radius: 999px; padding: 12px 20px; border: none; background: transparent; color: var(--muted); font-weight: 500; }
+  .btn.primary { background: var(--rasp); color: var(--white); font-weight: 600; }
+  .btn:focus-visible, .chip:focus-visible, textarea:focus-visible, input:focus-visible, .rev-item:focus-visible {
+    outline: 2px solid var(--rasp); outline-offset: 2px;
+  }
+  textarea, input {
+    width: 100%; border: 1px solid var(--line); background: var(--white); color: var(--ink);
+    border-radius: 16px; padding: 14px 16px; font-family: var(--sans); font-size: 1rem; line-height: 1.5;
+  }
+  textarea { min-height: 180px; resize: vertical; }
+  textarea.short { min-height: 110px; }
+  input { font-size: 1.1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .chip { border-radius: 999px; padding: 9px 15px; font-size: 0.9rem; font-weight: 500;
+    background: var(--white); color: var(--ink); border: 1px solid var(--line); }
+  .chips.tight { gap: 6px; }
+  .chips.tight .chip { padding: 8px 11px; font-size: 0.84rem; }
+  .chip.on { background: var(--rasp); color: var(--white); border-color: var(--rasp); }
+  .group { margin-top: 22px; }
+  .label { font-size: 1rem; font-weight: 600; line-height: 1.4; }
+  .row-label { font-size: 0.95rem; font-weight: 600; }
+  .footer { position: fixed; left: 0; right: 0; bottom: 0; background: var(--paper);
+    border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+  .footer-in { max-width: 460px; margin: 0 auto; padding: 12px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-right { display: flex; align-items: center; gap: 2px; }
+  .rev { margin-top: 24px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--white); }
+  .rev-item { display: block; width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid var(--line); }
+  .rev-item:last-child { border-bottom: none; }
+  .rev-title { display: block; font-size: 0.9rem; font-weight: 600; color: var(--ink); }
+  .rev-prev { display: block; font-size: 0.875rem; margin-top: 2px; color: var(--muted); }
+  .rev-prev.skip { color: var(--rasp); }
+  .card { margin-top: 24px; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .sign { font-family: var(--serif); font-size: 1.05rem; line-height: 1.6; }
+  .hidden { display: none; }
+  @media (prefers-reduced-motion: reduce) { .bar > div { transition: none; } }
+  @media (max-width: 340px) { .footer .btn { padding: 12px 14px; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  var FRIEND_NAME = "Chase"; // TEMPLATE: their first name, used as the header of the pasted answers
+  var KEY = "chase-intake-v1"; // TEMPLATE: must be unique per friend, e.g. "graysen-intake-v1"
+  var TIME_TEXT = "10 minutes"; // TEMPLATE: rough time to finish, e.g. "5 to 10 minutes" for a short form
+
+  // ============================================================
+  // TEMPLATE: this is the only section to rewrite for a new friend,
+  // plus the KEY above. Block types:
+  //   { type: "voice", id, label?, short? }
+  //   { type: "text", id, label, placeholder, numeric? }
+  //   { type: "chips", id, label?, options, multi?, max? }
+  //   { type: "grid", id, rows, options }
+  // Screen: { id, title, q, note?, hints?, blocks, foot? }
+  // Every block id must be unique across the whole form.
+  // The screens below are Chase's form (Module C: AI starter).
+  // ============================================================
+  var YNM = ["Yes", "Maybe", "No"];
+  var SCREENS = [
+    { id: "quick", title: "Quick round",
+      q: "No overthinking. Just tap what's true.",
+      blocks: [
+        { type: "chips", id: "usage", label: "How much do you use AI right now?", options: ["Not at all", "Here and there", "Most days"] },
+        { type: "chips", id: "lean", label: "Leaning toward ChatGPT or Claude?", options: ["ChatGPT", "Claude", "Not sure yet"] },
+        { type: "chips", id: "device", label: "Mostly on your phone or a computer?", options: ["Phone", "Computer", "Both"] },
+        { type: "chips", id: "mode", label: "Would you rather type or talk to it?", options: ["Type", "Talk", "Either"] },
+        { type: "chips", id: "budget", label: "What would you spend on AI a month?", options: ["Free for now", "Up to $20", "Up to $100", "More if it pays off"] }
+      ] },
+
+    { id: "eye", title: "What's caught your eye",
+      q: "What have you been reading or watching about AI lately? What caught your eye?",
+      hints: ["Agents or tools you've looked into", "Something you saw someone build", "Why it got your attention"],
+      blocks: [{ type: "voice", id: "eye" }] },
+
+    { id: "help", title: "Where it could help",
+      q: "Where could AI help you out? Give each one a quick reaction.",
+      blocks: [
+        { type: "grid", id: "uses", options: ["Ooh", "Meh", "No thanks"], rows: [
+          "Emails and texts I keep putting off",
+          "Schedules, ordering, and paperwork at the bar",
+          "Researching stocks and companies",
+          "Getting more mobile bar bookings",
+          "Agents that run tasks on their own",
+          "Making money with AI on the side",
+          "Trips, meals, and life admin"
+        ] }
+      ] },
+
+    { id: "heldback", title: "What's held you back",
+      q: "What's kept you from diving into AI so far? Pick up to three.",
+      note: "No wrong answers. This just tells me where to start.",
+      blocks: [
+        { type: "chips", id: "heldback", multi: true, max: 3, options: ["Work eats all my time", "Not sure where to start", "Not sure what to pay for", "Tried it, wasn't impressed", "Don't trust it with my info", "Just haven't gotten to it"] }
+      ] },
+
+    { id: "week", title: "A normal week",
+      q: "Walk me through a normal week. Where do your hours actually go?",
+      hints: ["What eats the most time", "What you do on autopilot", "What you dread"],
+      blocks: [{ type: "voice", id: "week" }] },
+
+    { id: "mobilebar", title: "The mobile bar",
+      q: "A few quick ones about the mobile bar.",
+      blocks: [
+        { type: "chips", id: "grow_want", label: "Would you want more events?", options: ["A lot more", "A few more", "It's good as is", "Not sure"] },
+        { type: "chips", id: "grow_limits", label: "What limits it right now?", multi: true, max: 3, options: ["Getting found", "My time", "Gear or staff", "Licenses or insurance", "Pricing", "Nothing really"] },
+        { type: "voice", id: "bookings", label: "How do bookings come in now?", short: true }
+      ] },
+
+    { id: "threemonths", title: "Three months out",
+      q: "Three months from now, you're using AI every day. What's different? And what should it take off your plate first?",
+      hints: ["At work", "With the mobile bar", "Something that makes or saves money"],
+      blocks: [{ type: "voice", id: "threemonths" }] },
+
+    { id: "anything", title: "Anything else",
+      q: "What's on your mind about any of this that I didn't ask?",
+      blocks: [{ type: "voice", id: "anything" }] }
+  ];
+
+  var BLOCKS = {};
+  SCREENS.forEach(function (sc) { sc.blocks.forEach(function (b) { BLOCKS[b.id] = b; }); });
+  var HALF = SCREENS.length >= 6 ? Math.ceil(SCREENS.length / 2) - 1 : -1;
+
+  function freshState() { return { screen: "welcome", qIndex: 0, v: {}, skipped: {} }; }
+  var s = freshState(), resumed = false, fromReview = false, copied = false;
+
+  function blockHas(b) {
+    if (b.type === "grid") return b.rows.some(function (r) { return !!s.v[b.id + ":" + r]; });
+    var x = s.v[b.id];
+    if (Array.isArray(x)) return x.length > 0;
+    return !!(x || "").toString().trim();
+  }
+  function screenHas(sc) { return sc.blocks.some(blockHas); }
+
+  try {
+    var raw = window.localStorage.getItem(KEY);
+    if (raw) {
+      var saved = JSON.parse(raw);
+      if (saved && saved.v) {
+        s = { screen: "welcome", qIndex: saved.qIndex || 0, v: saved.v || {}, skipped: saved.skipped || {} };
+        resumed = SCREENS.some(screenHas);
+      }
+    }
+  } catch (e) {}
+
+  var saveTimer = null;
+  function save() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { try { window.localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} }, 300);
+  }
+
+  function esc(t) {
+    return String(t == null ? "" : t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function words(t) { return (t || "").trim().split(/\s+/).filter(Boolean).length; }
+
+  // ---------- BLOCK RENDERING ----------
+  function renderBlock(b, first) {
+    var h = '<div class="' + (first && !b.label ? "" : "group") + '">';
+    if (b.label) h += '<p class="label">' + esc(b.label) + '</p>';
+
+    if (b.type === "voice") {
+      var val = s.v[b.id] || "";
+      h += '<p class="small muted mt8">Tap the mic on your keyboard and just talk. Rambling is perfect.</p>' +
+        '<textarea class="mt8' + (b.short ? " short" : "") + '" data-v="' + b.id + '" placeholder="Start talking..." aria-label="' + esc(b.label || "Your answer") + '">' + esc(val) + '</textarea>' +
+        '<p class="small rasp mt8' + (words(val) >= 40 ? "" : " hidden") + '" data-keep="' + b.id + '">This is great. Keep going, or move on when you are ready.</p>';
+    } else if (b.type === "text") {
+      h += '<input class="mt8" data-v="' + b.id + '" ' + (b.numeric ? 'inputmode="numeric" ' : '') +
+        'placeholder="' + esc(b.placeholder || "") + '" value="' + esc(s.v[b.id] || "") + '" aria-label="' + esc(b.label) + '">';
+    } else if (b.type === "chips") {
+      var cur = s.v[b.id];
+      h += '<div class="chips">';
+      b.options.forEach(function (o, i) {
+        var on = b.multi ? (Array.isArray(cur) && cur.indexOf(o) > -1) : cur === o;
+        h += '<button class="chip' + (on ? " on" : "") + '" data-chip="' + b.id + '" data-i="' + i + '" aria-pressed="' + on + '">' + esc(o) + '</button>';
+      });
+      h += '</div>';
+      if (b.multi) {
+        var n = Array.isArray(cur) ? cur.length : 0;
+        h += '<p class="small muted mt8">' + n + ' of ' + b.max + ' picked. Tap again to unpick.</p>';
+      }
+    } else if (b.type === "grid") {
+      b.rows.forEach(function (r, ri) {
+        var cur2 = s.v[b.id + ":" + r];
+        h += '<div class="group"><p class="row-label">' + esc(r) + '</p><div class="chips tight">';
+        b.options.forEach(function (o, i) {
+          var on2 = cur2 === o;
+          h += '<button class="chip' + (on2 ? " on" : "") + '" data-grid="' + b.id + '" data-row="' + ri + '" data-i="' + i + '" aria-pressed="' + on2 + '">' + esc(o) + '</button>';
+        });
+        h += '</div></div>';
+      });
+    }
+    return h + '</div>';
+  }
+
+  // ---------- SCREENS ----------
+  function renderWelcome() {
+    return '<div class="wrap welcome">' +
+      '<h1 class="big">A few questions,<br>from Michael.</h1>' +
+      '<div class="body-copy mt8">' +
+        '<p>This takes about ' + esc(TIME_TEXT) + ', and your answers come straight to me. There are no wrong answers, you can skip anything you want, and nothing gets sent until you press the last button yourself.</p>' +
+        '<p>One favor: use the little mic on your keyboard and just <em>talk</em>. Long, rambly, honest answers are perfect. Don\'t fix typos. The more you say, the better I can help.</p>' +
+        '<p class="muted">Your answers save automatically on this phone, so you can close this and come back any time.</p>' +
+        (resumed ? '<p class="rasp strong">Welcome back. Your earlier answers are still here.</p>' : '') +
+      '</div>' +
+      '<div class="mt40"><button class="btn primary" data-act="start">' + (resumed ? "Pick up where I left off" : "Let's go") + '</button></div>' +
+    '</div>';
+  }
+
+  function renderQuestion() {
+    var sc = SCREENS[s.qIndex];
+    var pct = ((s.qIndex + 1) / SCREENS.length) * 100;
+    var h = '<div class="wrap">' +
+      '<div class="bar"><div style="width:' + pct + '%"></div></div>' +
+      '<p class="small muted mt12">' + (s.qIndex + 1) + ' of ' + SCREENS.length + ' &middot; ' + esc(sc.title) + '</p>';
+    if (s.qIndex === HALF && !fromReview) h += '<p class="small rasp strong mt8">Halfway there. This is really helpful.</p>';
+    h += '<h1 class="q">' + esc(sc.q) + '</h1>';
+    if (sc.note) h += '<p class="small rasp mt12">' + esc(sc.note) + '</p>';
+    if (sc.hints) h += '<p class="small muted mt12">Things you might talk about: ' + sc.hints.map(esc).join(" &middot; ") + '</p>';
+    h += '<div class="mt20">';
+    sc.blocks.forEach(function (b, i) { h += renderBlock(b, i === 0); });
+    if (sc.foot) h += '<p class="small muted mt12">' + esc(sc.foot) + '</p>';
+    h += '</div></div>';
+
+    var nextLabel = fromReview ? "Save" : (s.qIndex === SCREENS.length - 1 ? "Review" : "Next");
+    h += '<div class="footer"><div class="footer-in">' +
+      '<button class="btn" data-act="back">Back</button>' +
+      '<div class="footer-right"><button class="btn" data-act="skip">Skip for now</button>' +
+      '<button class="btn primary" data-act="next">' + nextLabel + '</button></div></div></div>';
+    return h;
+  }
+
+  function blockValueText(b) {
+    if (b.type === "grid") return b.rows.map(function (r) { return s.v[b.id + ":" + r] ? r + ": " + s.v[b.id + ":" + r] : ""; }).filter(Boolean).join(", ");
+    var x = s.v[b.id];
+    if (Array.isArray(x)) return x.join(", ");
+    return (x || "").toString().trim();
+  }
+
+  function renderReview() {
+    var h = '<div class="wrap"><h1 class="mid">Read it back</h1>' +
+      '<p class="muted mt8">Tap anything to change it. Skipped ones are fine to leave skipped.</p><div class="rev">';
+    SCREENS.forEach(function (sc, i) {
+      var skipped = s.skipped[sc.id] && !screenHas(sc);
+      var pv = sc.blocks.map(blockValueText).filter(Boolean).join("  |  ");
+      var txt = skipped ? "Skipped for now" : (pv ? (pv.length > 90 ? pv.slice(0, 90) + "..." : pv) : "Empty");
+      h += '<button class="rev-item" data-jump="' + i + '"><span class="rev-title">' + (i + 1) + '. ' + esc(sc.title) + '</span>' +
+        '<span class="rev-prev' + (skipped ? " skip" : "") + '">' + esc(txt) + '</span></button>';
+    });
+    return h + '</div><div class="mt32"><button class="btn primary" data-act="done">Looks good</button> ' +
+      '<button class="btn" data-act="reviewback">Back</button></div></div>';
+  }
+
+  function compile() {
+    var out = [FRIEND_NAME.toUpperCase() + "'S ANSWERS  (" + new Date().toLocaleDateString() + ")", ""];
+    SCREENS.forEach(function (sc, i) {
+      out.push((i + 1) + ". " + sc.title.toUpperCase());
+      if (s.skipped[sc.id] && !screenHas(sc)) { out.push("(skipped for now)"); out.push(""); return; }
+      sc.blocks.forEach(function (b) {
+        if (b.type === "grid") {
+          b.rows.forEach(function (r) { out.push(r + ": " + (s.v[b.id + ":" + r] || "(no pick)")); });
+        } else {
+          var t = blockValueText(b) || (b.type === "voice" ? "(blank)" : "(no pick)");
+          out.push(b.label ? b.label + " " + t : t);
+        }
+      });
+      out.push("");
+    });
+    return out.join("\n");
+  }
+
+  function renderDone() {
+    return '<div class="wrap welcome"><h1 class="mid">Last step</h1>' +
+      '<p class="mt12" style="line-height:1.6">Press the button, then send it to me wherever we usually talk. That\'s the whole thing.</p>' +
+      '<div class="mt32"><button class="btn primary" data-act="copy">Copy my answers</button></div>' +
+      (copied === true ? '<div class="card"><p class="rasp strong">Copied.</p><p class="mt8" style="line-height:1.5">Now open wherever we usually talk, press and hold in the message box, and tap Paste. Done.</p></div>' : '') +
+      (copied === "fail" ? '<div class="card"><p class="rasp strong">Your phone blocked the copy.</p><p class="mt8" style="line-height:1.5">Press and hold in the box below, tap Select All, then Copy, and send it to me wherever we usually talk.</p><textarea class="mt12" readonly>' + esc(compile()) + '</textarea></div>' : '') +
+      '<p class="sign mt40">Thank you for doing this. For real.<br>— Michael</p>' +
+      '<div class="mt32"><button class="btn" data-act="toreview">Go back and read it again</button></div></div>';
+  }
+
+  var app = document.getElementById("app");
+  function render() {
+    var html = s.screen === "welcome" ? renderWelcome() : s.screen === "review" ? renderReview() : s.screen === "done" ? renderDone() : renderQuestion();
+    app.innerHTML = html;
+    window.scrollTo(0, 0);
+  }
+  function rerenderKeepScroll() {
+    var y = window.scrollY;
+    render();
+    window.scrollTo(0, y);
+  }
+
+  // ---------- NAVIGATION ----------
+  function goNext() {
+    if (fromReview) { fromReview = false; s.screen = "review"; }
+    else if (s.qIndex >= SCREENS.length - 1) s.screen = "review";
+    else s.qIndex += 1;
+    save(); render();
+  }
+  function goBack() {
+    if (fromReview) { fromReview = false; s.screen = "review"; }
+    else if (s.qIndex === 0) s.screen = "welcome";
+    else s.qIndex -= 1;
+    save(); render();
+  }
+  function skip() {
+    var sc = SCREENS[s.qIndex];
+    if (!screenHas(sc)) s.skipped[sc.id] = true;
+    goNext();
+  }
+
+  function fallbackCopy(text) {
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.top = "0"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+  function copyOut() {
+    var text = compile();
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { copied = true; render(); },
+        function () { copied = fallbackCopy(text) ? true : "fail"; render(); });
+    } else { copied = fallbackCopy(text) ? true : "fail"; render(); }
+  }
+
+  // ---------- EVENTS ----------
+  app.addEventListener("click", function (e) {
+    var t = e.target.closest("button");
+    if (!t) return;
+
+    if (t.dataset.chip) {
+      var b = BLOCKS[t.dataset.chip], opt = b.options[+t.dataset.i];
+      if (b.multi) {
+        var arr = Array.isArray(s.v[b.id]) ? s.v[b.id].slice() : [];
+        var at = arr.indexOf(opt);
+        if (at > -1) arr.splice(at, 1); else if (arr.length < b.max) arr.push(opt);
+        s.v[b.id] = arr;
+      } else {
+        s.v[b.id] = s.v[b.id] === opt ? "" : opt;
+      }
+      save(); rerenderKeepScroll(); return;
+    }
+    if (t.dataset.grid) {
+      var g = BLOCKS[t.dataset.grid], row = g.rows[+t.dataset.row], o2 = g.options[+t.dataset.i], k = g.id + ":" + row;
+      s.v[k] = s.v[k] === o2 ? "" : o2;
+      save(); rerenderKeepScroll(); return;
+    }
+    if (t.dataset.jump) {
+      fromReview = true; s.screen = "questions"; s.qIndex = +t.dataset.jump;
+      save(); render(); return;
+    }
+    var act = t.dataset.act;
+    if (act === "start") { s.screen = "questions"; save(); render(); }
+    else if (act === "next") goNext();
+    else if (act === "back") goBack();
+    else if (act === "skip") skip();
+    else if (act === "done") { s.screen = "done"; copied = false; save(); render(); }
+    else if (act === "reviewback") { s.screen = "questions"; s.qIndex = SCREENS.length - 1; save(); render(); }
+    else if (act === "toreview") { s.screen = "review"; save(); render(); }
+    else if (act === "copy") copyOut();
+  });
+
+  app.addEventListener("input", function (e) {
+    var el = e.target;
+    if (!el.dataset.v) return;
+    s.v[el.dataset.v] = el.value;
+    var hint = app.querySelector('[data-keep="' + el.dataset.v + '"]');
+    if (hint) hint.classList.toggle("hidden", words(el.value) < 40);
+    save();
+  });
+
+  window.addEventListener("pagehide", function () { try { window.localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {} });
+
+  render();
+})();
+</script>
+</body>
+</html>
